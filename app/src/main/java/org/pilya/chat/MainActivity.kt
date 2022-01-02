@@ -2,23 +2,43 @@ package org.pilya.chat
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.*
 
-import com.google.firebase.database.FirebaseDatabase
-
-
+import org.pilya.chat.databinding.ActivityMainBinding
 
 
 class MainActivity : AppCompatActivity() {
+
+    lateinit var binding: ActivityMainBinding
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        // Write a message to the database
-        // Write a message to the database
         val database = FirebaseDatabase.getInstance()
         val myRef = database.getReference("message")
 
-        myRef.setValue("Hello, World!")
+        binding.bnSend.setOnClickListener{
+            myRef.setValue(binding.editText.text.toString())
+        }
+        onChangeListener(myRef)
+     }
+
+
+    private fun onChangeListener(databaseReference: DatabaseReference){
+        databaseReference.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                binding.apply {
+                    rcView.append("\n")
+                    rcView.append(snapshot.value.toString())
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+        })
     }
 }
